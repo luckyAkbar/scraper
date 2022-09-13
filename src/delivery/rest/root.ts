@@ -1,9 +1,37 @@
-import express, { Request, Response } from 'express';
+import express, { Router as ExpressRouter } from 'express';
+import {
+    InstagramCrawlerUsecase as InstagramCrawlerUsecaseIface,
+} from '../../models/instagram_crawler';
+import { getByUsername } from './instagram_crawler_service';
 
-const router = express.Router();
+export type Router = {
+    router: ExpressRouter;
+    instagramCrawlerUsecase: InstagramCrawlerUsecaseIface;
+}
 
-router.get('/', (_req: Request, res: Response) => {
-    res.sendStatus(501);
-});
+const initRouter = (instagramCrawlerUsecase: InstagramCrawlerUsecaseIface): Router => {
+    const router: Router = {
+        instagramCrawlerUsecase: instagramCrawlerUsecase,
+        router: express.Router(),
+    };
 
-export default router;
+    return router;
+};
+
+export default class RESTService {
+    private router: Router;
+
+    constructor(instagramCrawlerUsecase: InstagramCrawlerUsecaseIface) {
+        this.router = initRouter(instagramCrawlerUsecase);
+    }
+
+    public initRoutes(): void {
+        getByUsername(this.router);
+        return;
+    }
+
+    get routes(): ExpressRouter{
+        return this.router.router;
+    }
+
+}

@@ -1,0 +1,1 @@
+export const ErrNotFound = new Error('Record not found');

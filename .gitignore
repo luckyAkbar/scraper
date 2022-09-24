@@ -2,3 +2,6 @@ build/
 .env
 node_modules/
 logs/
+p.txt
+test.js
+cookies/*

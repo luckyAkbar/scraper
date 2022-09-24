@@ -1,3 +1,4 @@
+import { Page } from 'puppeteer';
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../db/postgres';
 
@@ -49,10 +50,14 @@ InstagramCrawlingResult.init({
 
 export interface InstagramCrawlingUtility {
     getHTMLByUsername(username: string): Promise<string>
+    login(): Promise<Page>
+    getPostByTag(tag: string): Promise<string>
 }
 
 export interface InstagramCrawlerUsecase {
-    crawlPostPhotosByUsername(username: string): Promise<void>
+    getHTMLByUsername(username: string): Promise<string>
+    loginForInstagramCrawling(): Promise<void>
+    getPostByTag(tag: string): Promise<string>
 }
 
 export interface InstagramCrawlerRepository {

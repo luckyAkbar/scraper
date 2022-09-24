@@ -16,7 +16,7 @@
     "nodemon": "^2.0.19"
   },
   "scripts": {
-    "start-dev": "nodemon ./build/console/server.js",
+    "start-dev": "nodemon --delay 10000ms ./build/console/server.js",
     "build": "npx tsc",
     "watch": "npx tsc --watch"
   }

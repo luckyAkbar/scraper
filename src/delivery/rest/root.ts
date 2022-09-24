@@ -2,7 +2,7 @@ import express, { Router as ExpressRouter } from 'express';
 import {
     InstagramCrawlerUsecase as InstagramCrawlerUsecaseIface,
 } from '../../models/instagram_crawler';
-import { getByUsername } from './instagram_crawler_service';
+import { crawlPostByTag, getByUsername, loginInstagram } from './instagram_crawler_service';
 
 export type Router = {
     router: ExpressRouter;
@@ -27,6 +27,8 @@ export default class RESTService {
 
     public initRoutes(): void {
         getByUsername(this.router);
+        loginInstagram(this.router);
+        crawlPostByTag(this.router);
         return;
     }
 

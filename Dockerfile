@@ -19,9 +19,9 @@ COPY package-lock.json .
 
 RUN npm install
 
-RUN npx sequelize-cli db:migrate
-
 COPY . .
+
+RUN npx sequelize-cli db:migrate
 
 RUN npm run build
 

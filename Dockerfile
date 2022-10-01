@@ -26,7 +26,7 @@ RUN apt-get update \
 # ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 # Add user so we don't need --no-sandbox.
-RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
+RUN addgroup pptruser && adduser -G pptruser pptruser \
     && mkdir -p /home/pptruser/Downloads /app \
     && chown -R pptruser:pptruser /home/pptruser \
     && chown -R pptruser:pptruser /app

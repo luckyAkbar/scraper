@@ -1,7 +1,7 @@
 /* eslint-disable linebreak-style */
 import express, { Express } from 'express';
 import puppeteer from 'puppeteer';
-import { PUPPETEER_HEADLESS, SLOW_MOTION_MS } from '../config/config';
+import { PUPPETEER_EXECUTABLE_PATH, PUPPETEER_HEADLESS, SLOW_MOTION_MS } from '../config/config';
 import GagCrawler from '../crawler/9gag';
 import router from '../delivery/rest/root';
 import logger from '../helper/logger';
@@ -14,6 +14,7 @@ app.use(router);
 
 app.listen(3000, async () => {
     const browser = await puppeteer.launch({
+        executablePath: PUPPETEER_EXECUTABLE_PATH(),
         ignoreDefaultArgs: [
             '--disable-extentions',
             '--disable-notifications',

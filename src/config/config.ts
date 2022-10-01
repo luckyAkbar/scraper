@@ -79,3 +79,7 @@ export function POSTGRES_USERNAME(): string {
 
     return username;
 }
+
+export function PUPPETEER_EXECUTABLE_PATH(): string | undefined {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+}

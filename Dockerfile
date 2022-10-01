@@ -21,8 +21,6 @@ RUN npm install
 
 COPY . .
 
-RUN npx sequelize-cli db:migrate
-
 RUN npm run build
 
 CMD ["node", "./build/console/server.js"]

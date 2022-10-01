@@ -3,7 +3,7 @@ FROM node:16.17.0
 WORKDIR /app
 
 RUN apt install -y curl 
-RUN apt install -y --update bash
+RUN apt install -y bash
 
 RUN apt install -y gconf-service libasound2 libatk1.0-0 libc6 \
     libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 \

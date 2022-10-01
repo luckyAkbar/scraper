@@ -16,6 +16,7 @@ app.listen(3000, async () => {
     const browser = await puppeteer.launch({
         executablePath: PUPPETEER_EXECUTABLE_PATH(),
         ignoreDefaultArgs: [
+            '--no-sandbox',
             '--disable-extentions',
             '--disable-notifications',
         ],

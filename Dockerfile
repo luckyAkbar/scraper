@@ -3,6 +3,7 @@ FROM node:16.17.0-alpine
 WORKDIR /app
 
 RUN apk add curl 
+RUN apk add --update bash
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apk add -y gconf-service libasound2 libatk1.0-0 libc6 \

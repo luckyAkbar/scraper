@@ -25,9 +25,18 @@ export default class GagCrawler implements GagCrawlerIface {
             timeout: 0,
         });
 
+        let retryCount = 0;
+
         // eslint-disable-next-line no-constant-condition
         while (true) {
             try {
+                if (retryCount > 5) {
+                    logger.error("max retry count passed. Rerun the  crawler");
+                    this.crawl();
+
+                    retryCount = 0;
+                }
+
                 await this.scrollPageDown();
                 await this.page.waitForTimeout(5000);
                 
@@ -39,6 +48,7 @@ export default class GagCrawler implements GagCrawlerIface {
             } catch (e) {
                 logger.info('error when crawling: ', e);
                 await this.scrollPageUp();
+                retryCount++;
             }
         }
     }
@@ -64,7 +74,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
         try {
             await scrollDown.scrollPageToTop(this.page, {
-                size: 1000,
+                size: 500,
                 delay: 1000,
                 stepsLimit: 1,
             });

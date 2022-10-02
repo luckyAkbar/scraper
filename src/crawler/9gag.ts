@@ -33,6 +33,7 @@ export default class GagCrawler implements GagCrawlerIface {
                 if (retryCount > 5) {
                     logger.error("max retry count passed. Rerun the  crawler");
                     await this.run();
+                    await this.scrollPageDown(this.currentStreamID);
                 }
 
                 await this.scrollPageDown();
@@ -51,14 +52,14 @@ export default class GagCrawler implements GagCrawlerIface {
         }
     }
 
-    private async scrollPageDown(): Promise<void> {
+    private async scrollPageDown(steps = 1): Promise<void> {
         logger.info('scrolling page down.');
 
         try {
             await scrollDown.scrollPageToBottom(this.page, {
                 size: 2500,
                 delay: 1000,
-                stepsLimit: 1,
+                stepsLimit: steps,
             });
         } catch (e: unknown) {
             logger.error(`unexpected error happen on scrolling page down: ${e}`);

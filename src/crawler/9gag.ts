@@ -38,7 +38,7 @@ export default class GagCrawler implements GagCrawlerIface {
                     retryCount = 0;
                 }
 
-                await this.scrollPageDown();
+                await this.scrollPageDown(1);
                 await this.page.waitForTimeout(5000);
                 
                 const crawled = await this.crawl();
@@ -55,7 +55,7 @@ export default class GagCrawler implements GagCrawlerIface {
         }
     }
 
-    private async scrollPageDown(steps = 1): Promise<void> {
+    private async scrollPageDown(steps: number): Promise<void> {
         logger.info(`scrolling page down with steps ${steps}`);
 
         try {

@@ -85,6 +85,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
     private async crawl(): Promise<Array<GagMemeCrawlingResult>> {
         logger.info(`crawling for streamID: ${this.getCurrentStreamID()}`);
+        this.scrollIntoView();
         await this.page.waitForSelector(`#list-view-2 > ${this.getCurrentStreamID()}`);
         const res = await this.page.$eval(`#list-view-2 > ${this.getCurrentStreamID()}`, (element: Element): Array<GagMemeCrawlingResult> => {
             const result: Array<GagMemeCrawlingResult> = [];
@@ -143,5 +144,12 @@ export default class GagCrawler implements GagCrawlerIface {
 
     private increaseCurrentStreamID() {
         this.currentStreamID++;
+    }
+
+    private async scrollIntoView() {
+        await this.page.evaluate((element: string) => {
+            const target = document.querySelector(element);
+            if (target) target.scrollIntoView();
+        }, this.getCurrentStreamID());
     }
 }

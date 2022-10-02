@@ -34,6 +34,8 @@ export default class GagCrawler implements GagCrawlerIface {
                     logger.error("max retry count passed. Rerun the  crawler");
                     await this.run();
                     await this.scrollPageDown(this.currentStreamID);
+
+                    retryCount = 0;
                 }
 
                 await this.scrollPageDown();
@@ -44,6 +46,7 @@ export default class GagCrawler implements GagCrawlerIface {
                 logger.info('saved gag crawled value: ' + JSON.stringify(result));
 
                 this.increaseCurrentStreamID();
+                retryCount = 0;
             } catch (e) {
                 logger.info('error when crawling: ', e);
                 await this.scrollPageUp();
@@ -90,7 +93,7 @@ export default class GagCrawler implements GagCrawlerIface {
         logger.info(`crawling for streamID: ${this.getCurrentStreamID()}`);
         await this.scrollIntoView();
         await this.page.waitForSelector(`#list-view-2 > ${this.getCurrentStreamID()}`, {
-            timeout: 10000,
+            timeout: 5000,
         });
         const res = await this.page.$eval(`#list-view-2 > ${this.getCurrentStreamID()}`, (element: Element): Array<GagMemeCrawlingResult> => {
             const result: Array<GagMemeCrawlingResult> = [];

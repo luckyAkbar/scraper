@@ -53,14 +53,16 @@ export default class GagCrawler implements GagCrawlerIface {
     }
 
     private async scrollPageDown(steps = 1): Promise<void> {
-        logger.info('scrolling page down.');
+        logger.info(`scrolling page down with steps ${steps}`);
 
         try {
-            await scrollDown.scrollPageToBottom(this.page, {
-                size: 2500,
-                delay: 1000,
-                stepsLimit: steps,
-            });
+            for (let i = 0; i < steps; i++) {
+                await scrollDown.scrollPageToBottom(this.page, {
+                    size: 2500,
+                    delay: 1000,
+                    stepsLimit: 1,
+                });
+            }
         } catch (e: unknown) {
             logger.error(`unexpected error happen on scrolling page down: ${e}`);
             

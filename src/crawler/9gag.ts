@@ -37,8 +37,6 @@ export default class GagCrawler implements GagCrawlerIface {
 
                     retryCount = 0;
                 }
-
-                await this.findNextStream();
                 
                 const crawled = await this.crawl();
                 const result = await this.gagUsecase.save(crawled);
@@ -59,7 +57,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
         try {
             await scrollDown.scrollPageToBottom(this.page, {
-                size: 1000,
+                size: 1500,
                 delay: 1000,
                 stepsLimit: 1,
             });
@@ -75,7 +73,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
         try {
             await scrollDown.scrollPageToTop(this.page, {
-                size: 600,
+                size: 2000,
                 delay: 1000,
                 stepsLimit: 1,
             });
@@ -88,7 +86,8 @@ export default class GagCrawler implements GagCrawlerIface {
 
     private async crawl(): Promise<Array<GagMemeCrawlingResult>> {
         logger.info(`crawling for streamID: ${this.getCurrentStreamID()}`);
-        const res = await this.page.$eval(`#list-view-2 > ${this.getCurrentStreamID()}`, (element: Element): Array<GagMemeCrawlingResult> => {
+        await this.findNextStream();
+        const res = await this.page.$eval(`#list-view-2 ${this.getCurrentStreamID()}`, (element: Element): Array<GagMemeCrawlingResult> => {
             const result: Array<GagMemeCrawlingResult> = [];
 
             for (let i = 0; i < element.children.length; i++) {
@@ -150,9 +149,11 @@ export default class GagCrawler implements GagCrawlerIface {
     private async findNextStream(): Promise<void> {
         try {
             await this.page.waitForNetworkIdle();
-            await this.page.waitForSelector(`#list-view-2 > ${this.getCurrentStreamID()}`, {
+            await this.page.waitForSelector(`#list-view-2 ${this.getCurrentStreamID()}`, {
                 timeout: 5000,
             });
+
+            await this.scrollPageUp();
 
             return;
         } catch (e) {

@@ -151,7 +151,6 @@ export default class GagCrawler implements GagCrawlerIface {
         try {
             await this.page.waitForNetworkIdle();
             await this.page.waitForSelector(`#list-view-2 > ${this.getCurrentStreamID()}`, {
-                visible: true,
                 timeout: 5000,
             });
 

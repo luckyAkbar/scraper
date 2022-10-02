@@ -33,13 +33,12 @@ export default class GagCrawler implements GagCrawlerIface {
                 if (retryCount > 5) {
                     logger.error("max retry count passed. Rerun the  crawler");
                     await this.run();
-                    await this.scrollPageDown(this.currentStreamID);
+                    await this.scrollPageDown();
 
                     retryCount = 0;
                 }
 
-                await this.scrollPageDown(1);
-                await this.page.waitForTimeout(5000);
+                await this.findNextStream();
                 
                 const crawled = await this.crawl();
                 const result = await this.gagUsecase.save(crawled);
@@ -55,17 +54,15 @@ export default class GagCrawler implements GagCrawlerIface {
         }
     }
 
-    private async scrollPageDown(steps: number): Promise<void> {
-        logger.info(`scrolling page down with steps ${steps}`);
+    private async scrollPageDown(): Promise<void> {
+        logger.info(`scrolling page down.`);
 
         try {
-            for (let i = 0; i < steps; i++) {
-                await scrollDown.scrollPageToBottom(this.page, {
-                    size: 2500,
-                    delay: 1000,
-                    stepsLimit: 1,
-                });
-            }
+            await scrollDown.scrollPageToBottom(this.page, {
+                size: 200,
+                delay: 1000,
+                stepsLimit: 1,
+            });
         } catch (e: unknown) {
             logger.error(`unexpected error happen on scrolling page down: ${e}`);
             
@@ -91,11 +88,6 @@ export default class GagCrawler implements GagCrawlerIface {
 
     private async crawl(): Promise<Array<GagMemeCrawlingResult>> {
         logger.info(`crawling for streamID: ${this.getCurrentStreamID()}`);
-        await this.scrollIntoView();
-        await this.page.waitForSelector(`#list-view-2 > ${this.getCurrentStreamID()}`, {
-            visible: true,
-            timeout: 5000,
-        });
         const res = await this.page.$eval(`#list-view-2 > ${this.getCurrentStreamID()}`, (element: Element): Array<GagMemeCrawlingResult> => {
             const result: Array<GagMemeCrawlingResult> = [];
 
@@ -155,10 +147,19 @@ export default class GagCrawler implements GagCrawlerIface {
         this.currentStreamID++;
     }
 
-    private async scrollIntoView() {
-        await this.page.evaluate((id: string) => {
-            const target = document.getElementById(id);
-            if (target) target.scrollIntoView();
-        }, this.getCurrentStreamID());
+    private async findNextStream(): Promise<void> {
+        try {
+            await this.page.waitForNetworkIdle();
+            await this.page.waitForSelector(`#list-view-2 > ${this.getCurrentStreamID()}`, {
+                visible: true,
+                timeout: 5000,
+            });
+
+            return;
+        } catch (e) {
+            logger.warn(`failed to find the element ${this.getCurrentStreamID()}`);
+            await this.scrollPageDown();
+            await this.findNextStream();
+        }
     }
 }

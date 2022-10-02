@@ -32,9 +32,7 @@ export default class GagCrawler implements GagCrawlerIface {
             try {
                 if (retryCount > 5) {
                     logger.error("max retry count passed. Rerun the  crawler");
-                    this.crawl();
-
-                    retryCount = 0;
+                    await this.run();
                 }
 
                 await this.scrollPageDown();

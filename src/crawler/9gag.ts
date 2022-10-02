@@ -147,8 +147,8 @@ export default class GagCrawler implements GagCrawlerIface {
     }
 
     private async scrollIntoView() {
-        await this.page.evaluate((element: string) => {
-            const target = document.querySelector(element);
+        await this.page.evaluate((id: string) => {
+            const target = document.getElementById(id);
             if (target) target.scrollIntoView();
         }, this.getCurrentStreamID());
     }

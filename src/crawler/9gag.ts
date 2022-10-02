@@ -59,7 +59,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
         try {
             await scrollDown.scrollPageToBottom(this.page, {
-                size: 200,
+                size: 1000,
                 delay: 1000,
                 stepsLimit: 1,
             });

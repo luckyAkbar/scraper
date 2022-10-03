@@ -1,38 +1,94 @@
 /* eslint-disable quotes */
 /* eslint-disable max-len */
-import { Page } from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer';
+import { PUPPETEER_EXECUTABLE_PATH, PUPPETEER_HEADLESS, SLOW_MOTION_MS } from '../config/config';
 import { GAG_BASE_URL } from '../config/config';
 import scrollDown from 'puppeteer-autoscroll-down';
 import logger from '../helper/logger';
 import { GagCrawlerIface, GagMemeCrawlingResult, GagUsecase } from '../model/9gag';
 
 export default class GagCrawler implements GagCrawlerIface {
-    private page:  Page;
     private currentStreamID: number;
     private gagUsecase: GagUsecase;
+    private browser!: Browser;
+    private page!: Page;
 
-    constructor(page: Page, gagUsecase: GagUsecase) {
-        this.page = page;
+    constructor(gagUsecase: GagUsecase) {
         this.currentStreamID = 0;
         this.gagUsecase = gagUsecase;
     }
 
-    public async run(): Promise<void> {
-        logger.info('start to run crawler, go to 9gag host');
-        await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36");
-        await this.page.goto(GAG_BASE_URL(), {
+    private async startBrowser(): Promise<void> {
+        logger.info('Starting browser...');
+        try {
+            this.browser = await puppeteer.launch({
+                executablePath: PUPPETEER_EXECUTABLE_PATH(),
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                ],
+                ignoreDefaultArgs: [
+                    '--disable-extentions',
+                    '--disable-notifications',
+                ],
+                headless: PUPPETEER_HEADLESS(),
+                slowMo: SLOW_MOTION_MS(),
+            });
+        } catch (e) {
+            logger.info('failed to start browser, retrying...');
+            await this.startBrowser();
+        }
+    }
+
+    private async restartBrowser(): Promise<void> {
+        try {
+            logger.info('Restarting browser...');
+            await this.browser.close();
+            await this.startBrowser();
+        } catch (e) {
+            logger.error(`failed to restart browser ${e}, retrying...`);
+            await this.restartBrowser();
+        }
+    }
+
+    private async open9GagPage(): Promise<void> {
+        logger.info('Opening 9gag page...');
+        this.page = await this.browser.newPage();
+        this.page.goto(GAG_BASE_URL(), {
             waitUntil: 'domcontentloaded',
             timeout: 0,
         });
+        await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36");
+    }
+
+    private async restart9GagPage() {
+        try {
+            logger.info('Restarting 9gag page...');
+            await this.page.close();
+            await this.open9GagPage();
+        } catch (e) {
+            logger.info(`failed to restart 9gag page: ${e}, retrying...`);
+            await this.restart9GagPage();
+        }
+    }
+
+    public async run(): Promise<void> {
+        logger.info('start to run crawler, go to 9gag host');
+        await this.startBrowser();
+        await this.open9GagPage();
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
             const crawled = await this.crawl();
-            const result = await this.gagUsecase.save(crawled);
-            logger.info('saved gag crawled value: ' + JSON.stringify(result));
+            await this.gagUsecase.save(crawled);
 
             this.increaseCurrentStreamID();
             await this.scrollPageDown();
+
+            if (this.currentStreamID > 60) {
+                await this.restartBrowser();
+                await this.restart9GagPage();
+            }
         }
     }
 

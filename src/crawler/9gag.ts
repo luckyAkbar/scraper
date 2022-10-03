@@ -90,7 +90,7 @@ export default class GagCrawler implements GagCrawlerIface {
             this.increaseCurrentStreamID();
             await this.scrollPageDown();
 
-            if (this.currentStreamID > 70) await this.handleRestart();
+            if (this.currentStreamID > 50) await this.handleRestart();
         }
     }
 

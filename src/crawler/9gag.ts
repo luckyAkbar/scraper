@@ -26,6 +26,7 @@ export default class GagCrawler implements GagCrawlerIface {
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
+                    '--js-flags="--max-old-space-size=700"',
                 ],
                 ignoreDefaultArgs: [
                     '--disable-extentions',
@@ -37,17 +38,6 @@ export default class GagCrawler implements GagCrawlerIface {
         } catch (e) {
             logger.info('failed to start browser, retrying...');
             await this.startBrowser();
-        }
-    }
-
-    private async restartBrowser(): Promise<void> {
-        try {
-            logger.info('Restarting browser...');
-            await this.browser.close();
-            await this.startBrowser();
-        } catch (e) {
-            logger.error(`failed to restart browser ${e}, retrying...`);
-            await this.restartBrowser();
         }
     }
 
@@ -72,6 +62,21 @@ export default class GagCrawler implements GagCrawlerIface {
         }
     }
 
+    private async handleRestart() {
+        logger.info('PERFORMING RESTART SYSTEM');
+
+        try {
+            await this.restart9GagPage();
+
+            for (let i = 0; i < this.currentStreamID; i++) {
+                await this.scrollPageDown();
+            }
+        } catch (e) {
+            logger.error(`failed to perform system restart: ${e}, retrying...`);
+            await this.handleRestart();
+        }
+    }
+
     public async run(): Promise<void> {
         logger.info('start to run crawler, go to 9gag host');
         await this.startBrowser();
@@ -85,10 +90,7 @@ export default class GagCrawler implements GagCrawlerIface {
             this.increaseCurrentStreamID();
             await this.scrollPageDown();
 
-            if (this.currentStreamID > 60) {
-                await this.restartBrowser();
-                await this.restart9GagPage();
-            }
+            if (this.currentStreamID > 70) await this.handleRestart();
         }
     }
 
@@ -98,7 +100,7 @@ export default class GagCrawler implements GagCrawlerIface {
         try {
             await scrollDown.scrollPageToBottom(this.page, {
                 size: 500,
-                delay: 1000,
+                delay: 100,
                 stepsLimit: 1,
             });
         } catch (e: unknown) {
@@ -107,22 +109,6 @@ export default class GagCrawler implements GagCrawlerIface {
             throw new Error('Unable to scroll page down');
         }
     }
-
-    // private async scrollPageUp(): Promise<void> {
-    //     logger.info('scrolling page up.');
-
-    //     try {
-    //         await scrollDown.scrollPageToTop(this.page, {
-    //             size: 2000,
-    //             delay: 1000,
-    //             stepsLimit: 1,
-    //         });
-    //     } catch (e: unknown) {
-    //         logger.error(`unexpected error happen on scrolling page down: ${e}`);
-            
-    //         throw new Error('Unable to scroll page down');
-    //     }
-    // }
 
     private async crawl(): Promise<Array<GagMemeCrawlingResult>> {
         logger.info(`crawling for streamID: ${this.getCurrentStreamID()}`);

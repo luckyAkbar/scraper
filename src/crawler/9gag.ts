@@ -25,30 +25,14 @@ export default class GagCrawler implements GagCrawlerIface {
             timeout: 0,
         });
 
-        let retryCount = 0;
-
         // eslint-disable-next-line no-constant-condition
         while (true) {
-            try {
-                if (retryCount > 5) {
-                    logger.error("max retry count passed. Rerun the  crawler");
-                    await this.run();
-                    await this.scrollPageDown();
+            const crawled = await this.crawl();
+            const result = await this.gagUsecase.save(crawled);
+            logger.info('saved gag crawled value: ' + JSON.stringify(result));
 
-                    retryCount = 0;
-                }
-                
-                const crawled = await this.crawl();
-                const result = await this.gagUsecase.save(crawled);
-                logger.info('saved gag crawled value: ' + JSON.stringify(result));
-
-                this.increaseCurrentStreamID();
-                retryCount = 0;
-            } catch (e) {
-                logger.info('error when crawling: ', e);
-                await this.scrollPageUp();
-                retryCount++;
-            }
+            this.increaseCurrentStreamID();
+            await this.scrollPageDown();
         }
     }
 
@@ -57,7 +41,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
         try {
             await scrollDown.scrollPageToBottom(this.page, {
-                size: 1500,
+                size: 500,
                 delay: 1000,
                 stepsLimit: 1,
             });
@@ -68,26 +52,26 @@ export default class GagCrawler implements GagCrawlerIface {
         }
     }
 
-    private async scrollPageUp(): Promise<void> {
-        logger.info('scrolling page up.');
+    // private async scrollPageUp(): Promise<void> {
+    //     logger.info('scrolling page up.');
 
-        try {
-            await scrollDown.scrollPageToTop(this.page, {
-                size: 2000,
-                delay: 1000,
-                stepsLimit: 1,
-            });
-        } catch (e: unknown) {
-            logger.error(`unexpected error happen on scrolling page down: ${e}`);
+    //     try {
+    //         await scrollDown.scrollPageToTop(this.page, {
+    //             size: 2000,
+    //             delay: 1000,
+    //             stepsLimit: 1,
+    //         });
+    //     } catch (e: unknown) {
+    //         logger.error(`unexpected error happen on scrolling page down: ${e}`);
             
-            throw new Error('Unable to scroll page down');
-        }
-    }
+    //         throw new Error('Unable to scroll page down');
+    //     }
+    // }
 
     private async crawl(): Promise<Array<GagMemeCrawlingResult>> {
         logger.info(`crawling for streamID: ${this.getCurrentStreamID()}`);
         await this.findNextStream();
-        const res = await this.page.$eval(` ${this.getCurrentStreamID()}`, (element: Element): Array<GagMemeCrawlingResult> => {
+        const res = await this.page.$eval(this.getCurrentStreamID(), (element: Element): Array<GagMemeCrawlingResult> => {
             const result: Array<GagMemeCrawlingResult> = [];
 
             for (let i = 0; i < element.children.length; i++) {
@@ -146,20 +130,42 @@ export default class GagCrawler implements GagCrawlerIface {
         this.currentStreamID++;
     }
 
+    // private async findNextStream(): Promise<void> {
+    //     try {
+    //         await this.page.waitForNetworkIdle();
+    //         await this.page.waitForSelector(`${this.getCurrentStreamID()}`, {
+    //             timeout: 5000,
+    //         });
+
+    //         await this.scrollPageUp();
+
+    //         return;
+    //     } catch (e) {
+    //         logger.warn(`failed to find the element ${this.getCurrentStreamID()}`);
+    //         await this.scrollPageDown();
+    //         await this.page.waitForNetworkIdle();
+    //         await this.findNextStream();
+    //     }
+    // }
+
     private async findNextStream(): Promise<void> {
-        try {
-            await this.page.waitForNetworkIdle();
-            await this.page.waitForSelector(`${this.getCurrentStreamID()}`, {
-                timeout: 5000,
-            });
+        let found = false;
 
-            await this.scrollPageUp();
+        while (!found) {
+            try {
+                logger.info(`try to find next stream with id ${this.getCurrentStreamID()}`);
+                found = await this.page.$eval(this.getCurrentStreamID(), (element) => {
+                    const elem = element.id;
 
-            return;
-        } catch (e) {
-            logger.warn(`failed to find the element ${this.getCurrentStreamID()}`);
-            await this.scrollPageDown();
-            await this.findNextStream();
+                    console.log(elem);
+
+                    if (elem !== null) return true;
+                    return false;
+                });
+            } catch (e) {
+                logger.info(`failed to find stream: ${this.getCurrentStreamID()}`);
+                await this.scrollPageDown();
+            }
         }
     }
 }

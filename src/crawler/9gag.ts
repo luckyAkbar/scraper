@@ -67,10 +67,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
         try {
             await this.restart9GagPage();
-
-            for (let i = 0; i < this.currentStreamID; i++) {
-                await this.scrollPageDown();
-            }
+            await this.findNextStream();
         } catch (e) {
             logger.error(`failed to perform system restart: ${e}, retrying...`);
             await this.handleRestart();
@@ -90,7 +87,7 @@ export default class GagCrawler implements GagCrawlerIface {
             this.increaseCurrentStreamID();
             await this.scrollPageDown();
 
-            if (this.currentStreamID > 50) await this.handleRestart();
+            if (this.currentStreamID % 50 === 0) await this.handleRestart();
         }
     }
 

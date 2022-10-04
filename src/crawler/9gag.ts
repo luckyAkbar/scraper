@@ -203,11 +203,9 @@ export default class GagCrawler implements GagCrawlerIface {
         while (!found) {
             try {
                 logger.info(`try to find next stream with id ${this.getCurrentStreamID()}`);
+                await this.scrollPageUp();
                 found = await this.page.$eval(this.getCurrentStreamID(), (element) => {
                     const elem = element.id;
-
-                    console.log(elem);
-
                     if (elem !== null) return true;
                     return false;
                 });

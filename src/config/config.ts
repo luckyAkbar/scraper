@@ -35,7 +35,7 @@ export const LOG_LEVEL_VAR = LOG_LEVEL();
 
 export function POSTGRES_HOST(): string {
     const host = process.env.POSTGRES_HOST;
-    if (host === undefined) {
+    if (!host) {
         logger.error('No host postgres specified');
         throw new Error('No host postgres specified');
     }

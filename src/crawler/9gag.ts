@@ -42,32 +42,28 @@ export default class GagCrawler implements GagCrawlerIface {
     }
 
     private async open9GagPage(): Promise<void> {
-        logger.info('Opening 9gag page...');
-        this.page = await this.browser.newPage();
-        this.page.goto(GAG_BASE_URL(), {
-            waitUntil: 'domcontentloaded',
-            timeout: 0,
-        });
-        await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36");
-    }
-
-    private async restart9GagPage() {
         try {
-            logger.info('Restarting 9gag page...');
-            await this.page.close();
-            await this.open9GagPage();
+            logger.info('Opening 9gag page...');
+            this.page = await this.browser.newPage();
+            this.page.goto(GAG_BASE_URL(), {
+                waitUntil: 'domcontentloaded',
+                timeout: 0,
+            });
+            await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36");
         } catch (e) {
-            logger.info(`failed to restart 9gag page: ${e}, retrying...`);
-            await this.restart9GagPage();
+            logger.error('failed to open 9gag page. retrying...');
+            await this.open9GagPage();
         }
     }
 
-    private async handleRestart() {
+    public async handleRestart() {
         logger.info('PERFORMING RESTART SYSTEM');
 
         try {
-            await this.restart9GagPage();
-            await this.findNextStream();
+            await this.browser.close();
+            await this.startBrowser();
+            await this.open9GagPage();
+            await this.run();
         } catch (e) {
             logger.error(`failed to perform system restart: ${e}, retrying...`);
             await this.handleRestart();
@@ -84,10 +80,11 @@ export default class GagCrawler implements GagCrawlerIface {
             const crawled = await this.crawl();
             await this.gagUsecase.save(crawled);
 
-            this.increaseCurrentStreamID();
-            await this.scrollPageDown();
+            // if (this.currentStreamID % 3 === 0) await this.removeCurrentStream();
 
-            if (this.currentStreamID % 50 === 0) await this.handleRestart();
+            this.increaseCurrentStreamID();
+            await this.scrollPageUp();
+            await this.scrollPageDown();
         }
     }
 
@@ -102,8 +99,20 @@ export default class GagCrawler implements GagCrawlerIface {
             });
         } catch (e: unknown) {
             logger.error(`unexpected error happen on scrolling page down: ${e}`);
-            
-            throw new Error('Unable to scroll page down');
+        }
+    }
+
+    private async scrollPageUp(): Promise<void> {
+        logger.info(`scrolling page up.`);
+
+        try {
+            await scrollDown.scrollPageToTop(this.page, {
+                size: 1000,
+                delay: 100,
+                stepsLimit: 1,
+            });
+        } catch (e: unknown) {
+            logger.error(`unexpected error happen on scrolling page up: ${e}`);
         }
     }
 
@@ -151,6 +160,7 @@ export default class GagCrawler implements GagCrawlerIface {
                 }
             }
 
+            element.remove();
             return result;
         });
 
@@ -207,4 +217,18 @@ export default class GagCrawler implements GagCrawlerIface {
             }
         }
     }
+
+    // private async removeCurrentStream(): Promise<void> {
+    //     try {
+    //         logger.info('removing stream: ' + this.getCurrentStreamID());
+    //         await this.page.$eval(this.getCurrentStreamID(),(e) => {
+    //             if (!e) return;
+    //             console.log(e);
+    //             e.remove();
+    //         });
+    //     } catch (e) {
+    //         logger.error('failed to found stream: '+ this.getCurrentStreamID() + e);
+    
+    //     }
+    // }
 }

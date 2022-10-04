@@ -4,7 +4,7 @@ import {
     POSTGRES_PASSWORD, POSTGRES_PORT, 
     POSTGRES_USERNAME, 
 } from '../config/config';
-import logger from '../helper/logger';
+import logger from '../helper/logger'; 
 
 export const db = new Sequelize({
     dialect: 'postgres',

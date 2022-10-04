@@ -7,6 +7,7 @@ import { db } from '../db/postgres';
 
 export interface GagCrawlerIface {
     run(): Promise<void>
+    handleRestart(): Promise<void>
 }
 
 export interface GagRepository {

@@ -5,6 +5,8 @@ import router from '../delivery/rest/root';
 import logger from '../helper/logger';
 import GagRepository from '../repository/9gag';
 import GagUsecase from '../usecase/gag';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app: Express = express();
 
@@ -20,6 +22,6 @@ app.listen(3000, async () => {
         await gagCrawler.run();
     } catch (e: unknown) {
         logger.error(e);
-        await gagCrawler.run();
+        await gagCrawler.handleRestart();
     }
 });

@@ -25,7 +25,7 @@ export default class GagUsecase implements GagUsecaseIface {
         for (let i = 0; i < input.length; i++) {
             if (input[i].mediaUrl === undefined || input[i].mediaUrl === null) {
                 // eslint-disable-next-line max-len
-                logger.error(`unexpected null value on mediaUrl on gag crawling result: ${input[i]}`);
+                logger.error(`unexpected null value on mediaUrl on gag crawling result: ${JSON.stringify(input[i])}`);
                 continue;
             }
 

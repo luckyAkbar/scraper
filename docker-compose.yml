@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  scraper:
+    build: .
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}

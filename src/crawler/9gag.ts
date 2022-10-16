@@ -26,7 +26,6 @@ export default class GagCrawler implements GagCrawlerIface {
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
-                    '--js-flags="--max-old-space-size=700"',
                 ],
                 ignoreDefaultArgs: [
                     '--disable-extentions',

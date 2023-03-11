@@ -36,6 +36,7 @@ export default class GagCrawler implements GagCrawlerIface {
             });
         } catch (e) {
             logger.info('failed to start browser, retrying...');
+            logger.info("error: " + e);
             await this.startBrowser();
         }
     }
@@ -124,6 +125,9 @@ export default class GagCrawler implements GagCrawlerIface {
             for (let i = 0; i < element.children.length; i++) {
                 const article = element.children[i];
                 const articleIDParts = article.id.split('-');
+                console.log(article.children[0].tagName);
+                const head = article.children[0];
+                const videoTitle = head.querySelector('a > h2')?.textContent
                 if (articleIDParts.length !== 3 || articleIDParts[1] !== 'post') continue;
 
                 for (let k = 0; k < article.children.length; k++) {
@@ -153,7 +157,7 @@ export default class GagCrawler implements GagCrawlerIface {
                             'type': 'video',
                             'originalUrl': `https://9gag.com${originalLink}`,
                             'mediaUrl': video,
-                            'title': '',
+                            'title': videoTitle ? videoTitle : '',
                         });
                     }
                 }
@@ -225,7 +229,7 @@ export default class GagCrawler implements GagCrawlerIface {
     //         });
     //     } catch (e) {
     //         logger.error('failed to found stream: '+ this.getCurrentStreamID() + e);
-    
+
     //     }
     // }
 }

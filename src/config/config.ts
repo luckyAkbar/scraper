@@ -21,7 +21,7 @@ export function SLOW_MOTION_MS(): number {
 
     const ms = parseInt(cfg, 10);
     if (Number.isNaN(ms)) return 1000;
-    
+
     return ms;
 }
 

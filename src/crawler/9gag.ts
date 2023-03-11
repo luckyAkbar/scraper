@@ -125,9 +125,6 @@ export default class GagCrawler implements GagCrawlerIface {
             for (let i = 0; i < element.children.length; i++) {
                 const article = element.children[i];
                 const articleIDParts = article.id.split('-');
-                console.log(article.children[0].tagName);
-                const head = article.children[0];
-                const videoTitle = head.querySelector('a > h2')?.textContent
                 if (articleIDParts.length !== 3 || articleIDParts[1] !== 'post') continue;
 
                 for (let k = 0; k < article.children.length; k++) {
@@ -152,6 +149,8 @@ export default class GagCrawler implements GagCrawlerIface {
                     if (div2?.nodeName === 'A') {
                         const video = div1.querySelector('div > div > a > div > video > source:nth-child(1)')?.getAttribute('src');
                         const originalLink = div1.querySelector('div > div > a')?.getAttribute('href');
+                        const head = article.children[0];
+                        const videoTitle = head.querySelector('a > h2')?.textContent;
 
                         result.push({
                             'type': 'video',

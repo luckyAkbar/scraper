@@ -12,4 +12,3 @@ apt-get update   && apt-get install google-chrome-stable -y --no-install-recomme
 nvm install 16.17.0 &&
 nvm use 16.17.0 &&
 npm i
-return 0;

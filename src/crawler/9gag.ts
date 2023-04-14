@@ -1,7 +1,7 @@
 /* eslint-disable quotes */
 /* eslint-disable max-len */
 import puppeteer, { Browser, Page } from 'puppeteer';
-import { PUPPETEER_EXECUTABLE_PATH, PUPPETEER_HEADLESS, SLOW_MOTION_MS } from '../config/config';
+import { MAX_FIND_NEXT_STREAM_FAILED_ATTEMPTS, PUPPETEER_EXECUTABLE_PATH, PUPPETEER_HEADLESS, SLOW_MOTION_MS } from '../config/config';
 import { GAG_BASE_URL } from '../config/config';
 import scrollDown from 'puppeteer-autoscroll-down';
 import logger from '../helper/logger';
@@ -44,6 +44,7 @@ export default class GagCrawler implements GagCrawlerIface {
     private async open9GagPage(): Promise<void> {
         try {
             logger.info('Opening 9gag page...');
+            logger.info(GAG_BASE_URL())
             this.page = await this.browser.newPage();
             this.page.goto(GAG_BASE_URL(), {
                 waitUntil: 'domcontentloaded',
@@ -201,6 +202,7 @@ export default class GagCrawler implements GagCrawlerIface {
 
     private async findNextStream(): Promise<void> {
         let found = false;
+        let maxFailedAttempts = MAX_FIND_NEXT_STREAM_FAILED_ATTEMPTS();
 
         while (!found) {
             try {
@@ -214,6 +216,16 @@ export default class GagCrawler implements GagCrawlerIface {
             } catch (e) {
                 logger.info(`failed to find stream: ${this.getCurrentStreamID()}`);
                 await this.scrollPageDown();
+                maxFailedAttempts--;
+
+                logger.info("failed attempts left: " + maxFailedAttempts)
+
+                if (maxFailedAttempts === 0) {
+                    logger.error('failed to find next stream after much attempts' + MAX_FIND_NEXT_STREAM_FAILED_ATTEMPTS());
+                    logger.info("calling handle restart now after waiting for 5 seconds");
+                    await new Promise(r => setTimeout(r, 5000));
+                    await this.handleRestart()
+                }
             }
         }
     }

@@ -83,3 +83,13 @@ export function POSTGRES_USERNAME(): string {
 export function PUPPETEER_EXECUTABLE_PATH(): string | undefined {
     return process.env.PUPPETEER_EXECUTABLE_PATH;
 }
+
+export function MAX_FIND_NEXT_STREAM_FAILED_ATTEMPTS(): number {
+    const cfg = process.env.MAX_FIND_NEXT_STREAM_FAILED_ATTEMPTS;
+    if (cfg === undefined) return 5;
+
+    const attempts = parseInt(cfg, 10);
+    if (Number.isNaN(attempts)) return 5;
+
+    return attempts;
+}

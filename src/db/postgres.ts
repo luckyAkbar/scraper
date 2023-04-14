@@ -12,6 +12,7 @@ export const db = new Sequelize({
     port: POSTGRES_PORT(),
     password: POSTGRES_PASSWORD(),
     username: POSTGRES_USERNAME(),
+    logging: false,
     pool: {
         acquire: 100000,
         max: 10,

@@ -61,6 +61,7 @@ export default class GagCrawler implements GagCrawlerIface {
         logger.info('PERFORMING RESTART SYSTEM');
 
         try {
+            this.currentStreamID = 0;
             await this.browser.close();
             await this.startBrowser();
             await this.open9GagPage();

@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile_1cak
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}

@@ -93,3 +93,7 @@ export function MAX_FIND_NEXT_STREAM_FAILED_ATTEMPTS(): number {
 
     return attempts;
 }
+
+export function CAK_BASE_URL(): string {
+    return process.env.CAK_BASE_URL || "https://1cak.com";
+}

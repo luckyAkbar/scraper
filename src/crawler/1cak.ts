@@ -13,7 +13,7 @@ export default class CakCrawler {
     private gagUsecase: GagUsecase;
     // @ts-ignore
     private cakBaseUrl = CAK_BASE_URL();
-    private currentPostNumber = 2988000;
+    private currentPostNumber = 1;
 
     constructor(gagUsecase: GagUsecase) {
         this.gagUsecase = gagUsecase;

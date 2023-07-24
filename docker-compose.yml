@@ -5,3 +5,4 @@ services:
     build: .
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
+    command: "${CMD}"

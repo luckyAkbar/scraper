@@ -24,8 +24,6 @@ export default class CakCrawler {
             try {
                 const r = await this.crawl();
                 await this.gagUsecase.save([r]);
-            } catch (e: unknown) {
-                logger.error(e);
             } finally {
                 this.incrementPostNumber();
             }
@@ -39,8 +37,6 @@ export default class CakCrawler {
             const $ = cheerio.load(page.data);
 
             const posts: any = $(`[id^='posts']`).toArray()
-
-            console.log('length: ', posts.length)
 
             const imgContainer = posts[0].children[0].children[0].children[0].children[1].children[0];
 
@@ -56,11 +52,6 @@ export default class CakCrawler {
             if (!this.checkIsValidURL(mediaURL) || !this.checkIsValidURL(originalUrl)) {
                 throw new Error("Media URL or original url is not valid")
             }
-
-
-            console.log("Title: ", title)
-            console.log("Src: ", this.cakBaseUrl + src)
-            console.log("Original Link: ", this.cakBaseUrl + "/" + this.currentPostNumber.toString())
 
             return {
                 title: title,

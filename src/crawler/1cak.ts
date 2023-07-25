@@ -5,7 +5,7 @@ import axios from "axios"
 import cheerio from 'cheerio';
 import logger from "../helper/logger";
 import GagUsecase from "../usecase/gag";
-import { CAK_BASE_URL } from "../config/config";
+import { CAK_BASE_URL, CAK_POST_NUMBER } from "../config/config";
 import { GagMemeCrawlingResult } from "../model/9gag";
 
 export default class CakCrawler {
@@ -13,10 +13,11 @@ export default class CakCrawler {
     private gagUsecase: GagUsecase;
     // @ts-ignore
     private cakBaseUrl = CAK_BASE_URL();
-    private currentPostNumber = 1;
+    private currentPostNumber;
 
     constructor(gagUsecase: GagUsecase) {
         this.gagUsecase = gagUsecase;
+        this.currentPostNumber = CAK_POST_NUMBER();
     }
 
     public async run() {

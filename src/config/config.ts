@@ -97,3 +97,7 @@ export function MAX_FIND_NEXT_STREAM_FAILED_ATTEMPTS(): number {
 export function CAK_BASE_URL(): string {
     return process.env.CAK_BASE_URL || "https://1cak.com";
 }
+
+export function CAK_POST_NUMBER(): number {
+    return process.env.CAK_POST_NUMBER ? parseInt(process.env.CAK_POST_NUMBER, 10) : 1;
+}
